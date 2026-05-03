@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EUEE Quiz App</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#fff;min-height:100vh;}
+
+/* NAVBAR */
+.navbar{background:#1a2340;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+.navbar h1{color:#00d4ff;font-size:20px;}
+.navbar .user-info{display:flex;align-items:center;gap:10px;}
+.navbar .avatar{width:35px;height:35px;border-radius:50%;background:#00d4ff;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#000;}
+
+/* PAGES */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+
+/* LOGIN */
+.login-container{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+.login-box{background:#1a2340;border-radius:20px;padding:40px 30px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,212,255,0.1);}
+.login-box h2{color:#00d4ff;text-align:center;margin-bottom:8px;font-size:24px;}
+.login-box p{color:#888;text-align:center;margin-bottom:30px;font-size:14px;}
+.login-box .logo{text-align:center;font-size:50px;margin-bottom:15px;}
+.input-group{margin-bottom:15px;}
+.input-group label{display:block;color:#aaa;margin-bottom:6px;font-size:13px;}
+.input-group input{width:100%;padding:12px 15px;background:#0a0e1a;border:1px solid #2a3460;border-radius:10px;color:#fff;font-size:14px;outline:none;}
+.input-group input:focus{border-color:#00d4ff;}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#00d4ff,#0066ff);border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;margin-top:5px;}
+.btn-primary:active{opacity:0.8;}
+.switch-link{text-align:center;margin-top:15px;color:#888;font-size:13px;}
+.switch-link span{color:#00d4ff;cursor:pointer;}
+.error-msg{color:#ff4466;font-size:12px;text-align:center;margin-top:10px;min-height:18px;}
+
+/* DASHBOARD */
+.dashboard{padding:20px;}
+.welcome-card{background:linear-gradient(135deg,#1a2340,#0d1530);border:1px solid #2a3460;border-radius:15px;padding:20px;margin-bottom:20px;}
+.welcome-card h2{color:#00d4ff;margin-bottom:5px;}
+.welcome-card p{color:#888;font-size:13px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.stat-card{background:#1a2340;border-radius:12px;padding:15px;text-align:center;border:1px solid #2a3460;}
+.stat-card .num{font-size:24px;font-weight:bold;color:#00d4ff;}
+.stat-card .label{font-size:11px;color:#888;margin-top:3px;}
+.section-title{color:#fff;font-size:16px;font-weight:bold;margin-bottom:12px;}
+.subjects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+.subject-card{background:#1a2340;border-radius:15px;padding:20px 15px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all 0.2s;}
+.subject-card:active{transform:scale(0.97);}
+.subject-card.chemistry{border-color:#ff6b35;}
+.subject-card.biology{border-color:#00ff88;}
+.subject-card.physics{border-color:#00d4ff;}
+.subject-card.mathematics{border-color:#ffcc00;}
+.subject-card.english{border-color:#cc44ff;}
+.subject-card .icon{font-size:35px;margin-bottom:8px;}
+.subject-card h3{font-size:14px;margin-bottom:4px;}
+.subject-card p{font-size:11px;color:#888;}
+.subject-card .progress-bar{background:#0a0e1a;border-radius:5px;height:5px;margin-top:10px;}
+.subject-card .progress-fill{height:5px;border-radius:5px;background:#00d4ff;}
+
+/* LEADERBOARD */
+.leaderboard{padding:20px;}
+.lb-item{background:#1a2340;border-radius:12px;padding:15px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid #2a3460;}
+.lb-rank{font-size:20px;width:35px;text-align:center;}
+.lb-info{flex:1;}
+.lb-info .name{font-size:14px;font-weight:bold;}
+.lb-info .score{font-size:12px;color:#888;}
+.lb-points{color:#00d4ff;font-weight:bold;font-size:16px;}
+
+/* QUIZ */
+.quiz-container{padding:20px;max-width:600px;margin:0 auto;}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.quiz-subject{color:#00d4ff;font-weight:bold;}
+.quiz-progress{color:#888;font-size:13px;}
+.timer-box{background:#ff4466;color:#fff;padding:8px 15px;border-radius:20px;font-weight:bold;font-size:16px;}
+.timer-box.warning{background:#ffcc00;color:#000;}
+.timer-box.danger{background:#ff0000;animation:pulse 0.5s infinite;}
+@keyframes pulse{0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
+.progress-bar-full{background:#1a2340;border-radius:5px;height:6px;margin-bottom:20px;}
+.progress-bar-fill{height:6px;border-radius:5px;background:linear-gradient(90deg,#00d4ff,#0066ff);transition:width 0.3s;}
+.question-card{background:#1a2340;border-radius:15px;padding:20px;margin-bottom:20px;border:1px solid #2a3460;}
+.question-num{color:#888;font-size:12px;margin-bottom:8px;}
+.question-text{font-size:15px;line-height:1.6;color:#fff;}
+.options{display:flex;flex-direction:column;gap:10px;}
+.option{background:#0a0e1a;border:2px solid #2a3460;border-radius:12px;padding:14px 16px;cursor:pointer;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:10px;}
+.option:active{transform:scale(0.98);}
+.option.selected{border-color:#00d4ff;background:#001a2e;}
+.option.correct{border-color:#00ff88;background:#002200;color:#00ff88;}
+.option.wrong{border-color:#ff4466;background:#220000;color:#ff4466;}
+.option .opt-letter{width:28px;height:28px;border-radius:50%;background:#2a3460;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;}
+.explanation{background:#001a2e;border:1px solid #00d4ff;border-radius:10px;padding:15px;margin-top:15px;font-size:13px;color:#aaa;line-height:1.5;}
+.explanation strong{color:#00d4ff;}
+.btn-next{width:100%;padding:14px;background:linear-gradient(135deg,#00d4ff,#0066ff);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;margin-top:15px;}
+
+/* RESULT */
+.result-container{padding:20px;text-align:center;}
+.result-circle{width:150px;height:150px;border-radius:50%;margin:30px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;border:6px solid #00d4ff;}
+.result-circle .score-num{font-size:40px;font-weight:bold;color:#00d4ff;}
+.result-circle .score-total{font-size:14px;color:#888;}
+.result-grade{font-size:24px;font-weight:bold;margin:10px 0;}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;}
+.result-stat{background:#1a2340;border-radius:12px;padding:15px;}
+.result-stat .num{font-size:22px;font-weight:bold;}
+.result-stat .label{font-size:11px;color:#888;margin-top:3px;}
+.btn-retry{padding:13px 30px;background:linear-gradient(135deg,#00d4ff,#0066ff);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;margin:5px;}
+.btn-home{padding:13px 30px;background:#1a2340;border:1px solid #2a3460;border-radius:12px;color:#fff;font-size:15px;cursor:pointer;margin:5px;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1a2340;padding:10px 0;display:flex;justify-content:around;border-top:1px solid #2a3460;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:5px;}
+.nav-item .nav-icon{font-size:22px;}
+.nav-item .nav-label{font-size:10px;color:#888;margin-top:2px;}
+.nav-item.active .nav-label{color:#00d4ff;}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 5px #00d4ff);}
+
+.pb-20{padding-bottom:80px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="loginPage">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo">🎓</div>
+      <h2>EUEE Quiz</h2>
+      <p>Ethiopian University Entrance Exam Preparation</p>
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="loginName" placeholder="Enter your full name">
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="Enter your email">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn-primary" onclick="login()">Sign In</button>
+      <div class="switch-link">Don't have an account? <span onclick="showSignup()">Sign Up</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP PAGE -->
+<div class="page" id="signupPage">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo">🎓</div>
+      <h2>Create Account</h2>
+      <p>Join thousands of Ethiopian students</p>
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Enter your full name">
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="Enter your email">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min 6 characters">
+      </div>
+      <div class="input-group">
+        <label>Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="Repeat password">
+      </div>
+      <div class="error-msg" id="signupError"></div>
+      <button class="btn-primary" onclick="signup()">Create Account</button>
+      <div class="switch-link">Already have an account? <span onclick="showLogin()">Sign In</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="page" id="mainPage">
+  <div class="navbar">
+    <h1>🎓 EUEE Quiz</h1>
+    <div class="user-info">
+      <div class="avatar" id="userAvatar">U</div>
+      <span style="font-size:13px;color:#aaa;" id="userName">User</span>
+      <span style="cursor:pointer;color:#ff4466;font-size:13px;" onclick="logout()">Logout</span>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardView" class="pb-20">
+    <div class="dashboard">
+      <div class="welcome-card">
+        <h2 id="welcomeText">Welcome back! 👋</h2>
+        <p>Ready to practice for EUEE? Choose a subject below.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="statTotal">0</div>
+          <div class="label">Quizzes Taken</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statAvg">0%</div>
+          <div class="label">Avg Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statBest">0%</div>
+          <div class="label">Best Score</div>
+        </div>
+      </div>
+      <div class="section-title">📚 Choose Subject</div>
+      <div class="subjects-grid">
+        <div class="subject-card chemistry" onclick="startQuiz('chemistry')">
+          <div class="icon">⚗️</div>
+          <h3>Chemistry</h3>
+          <p>Grade 12 — 200 Q</p>
+          <div class="progress-bar"><div class="progress-fill chemistry-prog" style="width:0%;background:#ff6b35;"></div></div>
+        </div>
+        <div class="subject-card biology" onclick="startQuiz('biology')">
+          <div class="icon">🧬</div>
+          <h3>Biology</h3>
+          <p>Grade 12 — 200 Q</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#00ff88;"></div></div>
+        </div>
+        <div class="subject-card physics" onclick="startQuiz('physics')">
+          <div class="icon">⚡</div>
+          <h3>Physics</h3>
+          <p>Grade 12 — 200 Q</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#00d4ff;"></div></div>
+        </div>
+        <div class="subject-card mathematics" onclick="startQuiz('mathematics')">
+          <div class="icon">🔢</div>
+          <h3>Mathematics</h3>
+          <p>Grade 12 — 200 Q</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#ffcc00;"></div></div>
+        </div>
+        <div class="subject-card english" onclick="startQuiz('english')" style="grid-column:span 2;">
+          <div class="icon">🇬🇧</div>
+          <h3>English</h3>
+          <p>Grade 12 — 200 Q</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#cc44ff;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ VIEW -->
+  <div id="quizView" style="display:none;" class="pb-20">
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <span class="quiz-subject" id="quizSubjectLabel">Chemistry</span>
+        <div class="timer-box" id="timerBox">⏱ 60s</div>
+      </div>
+      <div class="quiz-progress" id="quizProgress">Question 1 of 20</div>
+      <div class="progress-bar-full">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="question-card">
+        <div class="question-num" id="questionNum">Question 1</div>
+        <div class="question-text" id="questionText">Loading...</div>
+      </div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="explanation" id="explanationBox" style="display:none">
+        <strong>💡 Explanation:</strong> <span id="explanationText"></span>
+      </div>
+      <button class="btn-next" id="nextBtn" style="display:none" onclick="nextQuestion()">Next Question →</button>
+    </div>
+  </div>
+
+  <!-- RESULT VIEW -->
+  <div id="resultView" style="display:none;">
+    <div class="result-container">
+      <h2 style="color:#00d4ff;margin-bottom:5px;">Quiz Complete! 🎉</h2>
+      <p style="color:#888;font-size:13px;" id="resultSubject">Chemistry</p>
+      <div class="result-circle">
+        <div class="score-num" id="resultScore">0</div>
+        <div class="score-total" id="resultTotal">of 20</div>
+      </div>
+      <div class="result-grade" id="resultGrade">Good Job!</div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="num" style="color:#00ff88;" id="resultCorrect">0</div>
+          <div class="label">✓ Correct</div>
+        </div>
+        <div class="result-stat">
+          <div class="num" style="color:#ff4466;" id="resultWrong">0</div>
+          <div class="label">✗ Wrong</div>
+        </div>
+        <div class="result-stat">
+          <div class="num" style="color:#ffcc00;" id="resultPercent">0%</div>
+          <div class="label">Score</div>
+        </div>
+      </div>
+      <div>
+        <button class="btn-retry" onclick="retryQuiz()">🔄 Retry</button>
+        <button class="btn-home" onclick="goHome()">🏠 Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD VIEW -->
+  <div id="leaderboardView" style="display:none;" class="pb-20">
+    <div style="padding:20px;">
+      <h2 style="color:#00d4ff;margin-bottom:15px;">🏆 Leaderboard</h2>
+      <div id="leaderboardList"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div id="profileView" style="display:none;" class="pb-20">
+    <div style="padding:20px;text-align:center;">
+      <div style="width:80px;height:80px;border-radius:50%;background:#00d4ff;margin:20px auto;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#000;" id="profileAvatar">U</div>
+      <h2 id="profileName" style="color:#fff;margin-bottom:5px;">User</h2>
+      <p id="profileEmail" style="color:#888;font-size:13px;margin-bottom:20px;">email</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="profileTotal">0</div>
+          <div class="label">Quizzes</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="profileAvg">0%</div>
+          <div class="label">Average</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="profileBest">0%</div>
+          <div class="label">Best</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showView('dashboard')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" id="nav-leaderboard" onclick="showView('leaderboard')">
+      <div class="nav-icon">🏆</div>
+      <div class="nav-label">Ranking</div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showView('profile')">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== QUESTIONS DATABASE ==========
+const questions = {
+  chemistry: [
+    {q:"Which of the following is a strong acid?",opts:["Acetic acid","Hydrochloric acid","Carbonic acid","Phosphoric acid"],ans:1,exp:"HCl completely dissociates in water making it a strong acid."},
+    {q:"What is the pH of a neutral solution at 25°C?",opts:["0","14","7","1"],ans:2,exp:"Pure water at 25°C has equal H⁺ and OH⁻ concentrations giving pH=7."},
+    {q:"According to Bronsted-Lowry theory, an acid is:",opts:["A proton acceptor","An electron donor","A proton donor","An electron acceptor"],ans:2,exp:"Bronsted-Lowry defines acid as proton (H⁺) donor."},
+    {q:"Which of the following is a buffer solution?",opts:["NaCl + HCl","NaOH + NaCl","HCl + NaCl","CH₃COOH + CH₃COONa"],ans:3,exp:"A buffer contains weak acid and its conjugate base."},
+    {q:"The conjugate base of H₂SO₄ is:",opts:["SO₄²⁻","H₂SO₃","SO₃","HSO₄⁻"],ans:3,exp:"Conjugate base is formed by removing one H⁺ from the acid."},
+    {q:"Which process occurs at the anode in electrolysis?",opts:["Reduction","Oxidation","Neutralization","Precipitation"],ans:1,exp:"Oxidation always occurs at the anode in electrochemical cells."},
+    {q:"What is the unit of electromotive force (EMF)?",opts:["Ampere","Ohm","Volt","Watt"],ans:2,exp:"EMF is measured in Volts (V)."},
+    {q:"Which polymer is formed from ethylene monomers?",opts:["Nylon","PVC","Polyethylene","Polystyrene"],ans:2,exp:"Polyethylene is formed by polymerization of ethylene (CH₂=CH₂)."},
+    {q:"The Haber process is used to manufacture:",opts:["Sulfuric acid","Ammonia","Nitric acid","Hydrogen"],ans:1,exp:"The Haber process combines N₂ and H₂ under high pressure and temperature to produce NH₃."},
+    {q:"Which gas causes acid rain?",opts:["CO₂","O₂","SO₂","N₂"],ans:2,exp:"SO₂ reacts with water vapor to form H₂SO₄ causing acid rain."},
+    {q:"What type of reaction is: Zn + CuSO₄ → ZnSO₄ + Cu?",opts:["Decomposition","Synthesis","Single displacement","Double displacement"],ans:2,exp:"Zinc displaces copper from copper sulfate — single displacement reaction."},
+    {q:"Which of the following has the highest electronegativity?",opts:["Oxygen","Nitrogen","Chlorine","Fluorine"],ans:3,exp:"Fluorine has the highest electronegativity (3.98) of all elements."},
+    {q:"The oxidation state of Cr in K₂Cr₂O₇ is:",opts:["+3","+6","+7","+4"],ans:1,exp:"In K₂Cr₂O₇: 2(+1) + 2(Cr) + 7(-2) = 0, solving gives Cr = +6."},
+    {q:"Which electrode is the cathode in galvanic cell?",opts:["Positive electrode","Negative electrode","Both","Neither"],ans:0,exp:"In a galvanic cell, reduction occurs at cathode which is the positive electrode."},
+    {q:"What is the IUPAC name of CH₃CH₂OH?",opts:["Methanol","Propanol","Ethanol","Butanol"],ans:2,exp:"CH₃CH₂OH has 2 carbons with OH group — ethanol."},
+    {q:"Which of the following is a thermoplastic polymer?",opts:["Bakelite","Melamine","PVC","Vulcanized rubber"],ans:2,exp:"PVC (Polyvinyl chloride) is a thermoplastic that softens on heating."},
+    {q:"The pH of a 0.01 M HCl solution is:",opts:["1","2","3","4"],ans:1,exp:"pH = -log[H⁺] = -log(0.01) = -log(10⁻²) = 2."},
+    {q:"Which reaction produces a precipitate of AgCl?",opts:["AgNO₃ + NaCl","AgNO₃ + NaNO₃","AgCl + NaCl","Ag + Cl₂"],ans:0,exp:"AgNO₃ + NaCl → AgCl↓ + NaNO₃. AgCl is insoluble white precipitate."},
+    {q:"What is the main component of natural gas?",opts:["Ethane","Pr
